@@ -1,0 +1,14 @@
+# Knowledge Layer — Domain Routing
+# Maps file paths to knowledge domains.
+# Add domains below, then reference them in decisions.jsonl.
+
+domains:
+  # example:
+  #   routes:
+  #     - "src/**"
+  #   maps:
+  #     - "knowledge/maps/architecture.md"
+  #   decisions_domain:
+  #     - "example"
+
+singletons: []
