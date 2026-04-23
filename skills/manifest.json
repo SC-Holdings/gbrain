@@ -198,6 +198,21 @@
       "name": "voice-note-ingest",
       "path": "voice-note-ingest/SKILL.md",
       "description": "Ingest voice notes with exact-phrasing preservation (never paraphrased); routes content based on a decision tree across originals/concepts/people/companies/ideas/personal/voice-notes."
+    },
+    {
+      "name": "idea-triage",
+      "path": "idea-triage",
+      "description": "Stage-gate validation for business and technical ideas. Evaluates kill criteria and advances ideas through pipeline stages."
+    },
+    {
+      "name": "inbox-triage",
+      "path": "inbox-triage",
+      "description": "Three-tier classification of brain inbox items. Routes high-value to proper namespaces, keeps references, flags noise."
+    },
+    {
+      "name": "signal-to-idea",
+      "path": "signal-to-idea/SKILL.md",
+      "description": "Promote high-confidence influencer signals to gbrain idea pages. Reads classified signals with signal_type=business_idea and confidence=high, creates idea pages in ideas/ namespace with pipeline frontmatter."
     }
   ],
   "dependencies": {
