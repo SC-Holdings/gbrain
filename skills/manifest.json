@@ -207,7 +207,20 @@
     {
       "name": "ask-user",
       "path": "ask-user/SKILL.md",
-      "description": "Reusable choice-gate pattern for presenting users with 2-4 options and stopping execution until they respond. Platform-agnostic (Telegram buttons, Discord, CLI, OpenClaw clarify tool)."
+      "description": "Reusable choice-gate pattern for presenting users with 2-4 options and stopping execution until they respond. Platform-agnostic (Telegram buttons, Discord, CLI, OpenClaw clarify tool).",
+      "name": "idea-triage",
+      "path": "idea-triage/SKILL.md",
+      "description": "Stage-gate validation for business and technical ideas. Evaluates kill criteria and advances ideas through pipeline stages."
+    },
+    {
+      "name": "inbox-triage",
+      "path": "inbox-triage/SKILL.md",
+      "description": "Three-tier classification of brain inbox items. Routes high-value to proper namespaces, keeps references, flags noise."
+    },
+    {
+      "name": "signal-to-idea",
+      "path": "signal-to-idea/SKILL.md",
+      "description": "Promote high-confidence influencer signals to gbrain idea pages. Reads classified signals with signal_type=business_idea and confidence=high, creates idea pages in ideas/ namespace with pipeline frontmatter."
     }
   ],
   "dependencies": {

@@ -22,6 +22,23 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 | "Research", "track", "extract from email", "investor updates", "donations" | `skills/data-research/SKILL.md` |
 | Share a brain page as a link | `skills/publish/SKILL.md` |
 | "validate frontmatter", "check frontmatter", "fix frontmatter", "frontmatter audit", "brain lint" | `skills/frontmatter-guard/SKILL.md` |
+| "Triage idea", "evaluate idea", "advance idea", "kill idea", "idea pipeline status" | `skills/idea-triage/SKILL.md` |
+| "Triage inbox", "process inbox", "classify inbox", "clean inbox" | `skills/inbox-triage/SKILL.md` |
+
+
+## Namespace routing (brain filing by type)
+
+| Namespace | Content Type | Primary Skill |
+|-----------|-------------|---------------|
+| ideas/ | Business and technical ideas with pipeline frontmatter | idea-triage (evaluation), idea-ingest (intake) |
+| articles/ | Wiki-llm research articles (Karpathy schema) | data-research |
+| concepts/ | Frameworks, mental models, reusable thinking | idea-ingest (create), query (read) |
+| people/ | Person dossiers with compiled truth + timeline | enrich |
+| companies/ | Company profiles | enrich |
+| meetings/ | Meeting transcripts + summaries | meeting-ingestion |
+| digests/ | Influencer pipeline daily digests | Cron-generated |
+| reflections/ | Dream-cycle nightly reflections | Cron-generated |
+| plans/ | Daily plans | daily-task-prep |
 
 ## Content & media ingestion
 
@@ -32,17 +49,32 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 | Meeting transcript received | `skills/meeting-ingestion/SKILL.md` |
 | Generic "ingest this" (auto-routes to above) | `skills/ingest/SKILL.md` |
 
-## Thinking skills (from GStack)
+## GStack Review Personas (native subagents via PR #4220)
+
+| Trigger | Command | Focus |
+|---------|---------|-------|
+| "Review this strategically", "CEO review", "strategic fit" | /ceo-review | Strategic fit, user value, market timing |
+| "Architecture review", "tech debt", "eng review" | /eng-review | Architecture, tech debt, maintainability |
+| "Design review", "UX review", "accessibility" | /design-review | UX flow, visual design, accessibility |
+| "Code review", "review this code", "production safety" | /reviewer | Code quality, testing, production safety |
+| "QA audit", "test coverage", "edge cases" | /qa-audit | Testing, edge cases, user flows |
+| "Security review", "OWASP", "compliance" | /cso | Security, OWASP, compliance |
+| "Release check", "deployment safety", "rollback" | /release-check | Deployment strategy, rollback, monitoring |
+| "List personas", "gstack" | /gstack | Show all available personas |
+
+> These are native Hermes subagents (not external GStack dependency).
+> Each persona spawns an isolated child agent with specialized system prompt.
+> For business idea triage, /ceo-review is directly applicable.
+
+## GStack Thinking Skills (original)
 
 | Trigger | Skill |
 |---------|-------|
 | "Brainstorm", "I have an idea", "office hours" | GStack: office-hours |
-| "Review this plan", "CEO review", "poke holes" | GStack: ceo-review |
 | "Debug", "fix", "broken", "investigate" | GStack: investigate |
 | "Retro", "what shipped", "retrospective" | GStack: retro |
 
-> These skills come from GStack. If GStack is installed, the agent reads them directly.
-> If not, brain-only mode still works (brain skills function without thinking skills).
+> Original GStack thinking skills. Complementary to the review personas above.
 
 ## Operational
 
