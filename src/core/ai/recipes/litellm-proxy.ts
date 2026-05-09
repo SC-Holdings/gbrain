@@ -31,6 +31,12 @@ export const litellmProxy: Recipe = {
       // no static cap to declare here. v0.32 (#779).
       no_batch_cap: true,
     },
+    chat: {
+      // Models depend on the proxy/upstream; openai-compat tier accepts arbitrary ids.
+      models: [],
+      supports_tools: true,
+      supports_subagent_loop: false,
+    },
   },
   setup_hint: 'Run LiteLLM (https://docs.litellm.ai) in front of any provider; set LITELLM_BASE_URL + pass --embedding-model litellm:<model> and --embedding-dimensions <N>.',
 };
