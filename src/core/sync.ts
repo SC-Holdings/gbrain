@@ -12,6 +12,11 @@
  */
 
 import { CJK_SLUG_CHARS } from './cjk.ts';
+// v0.37.7.0 #1169 submodule-detection helpers. Bottom-of-file already
+// aliases existsSync as `_existsSync` for other purposes; the top-of-file
+// import keeps the pruneDir helper's deps near its callsite.
+import { existsSync, statSync } from 'fs';
+import { join as pathJoin } from 'path';
 
 export interface SyncManifest {
   added: string[];
@@ -80,6 +85,12 @@ const CODE_EXTENSIONS = new Set<string>([
   // recursive chunker (no tree-sitter grammar), which is the correct
   // fallback — same path as toml / yaml without language-specific AST.
   '.tf', '.tfvars', '.hcl',
+  // v0.41 D2 wave (#1173): SQL via tree-sitter-sql. DerekStride grammar
+  // chunks DDL (CREATE TABLE/FUNCTION/VIEW/INDEX) and DML (SELECT/INSERT/
+  // UPDATE/DELETE) as one chunk per statement. DDL chunks carry
+  // symbol_name + symbol_type populated for code-def; DML chunks emit
+  // unnamed so they don't pollute symbol search.
+  '.sql',
 ]);
 
 /**
@@ -243,8 +254,14 @@ const PRUNE_DIR_NAMES = new Set<string>([
  *
  * `name` is a single path segment (basename of the directory entry), NOT a
  * full path. Walkers consult this on each subdirectory entry during recursion.
+ *
+ * v0.37.7.0 #1169: when callers pass `parentDir`, ALSO skip git submodule
+ * directories (detected by the presence of `.git` as a FILE — not a
+ * directory — inside the candidate dir). The `parentDir` arg is optional so
+ * existing callers stay back-compat; new callers (sync walker, extract
+ * walker) thread it through.
  */
-export function pruneDir(name: string): boolean {
+export function pruneDir(name: string, parentDir?: string): boolean {
   if (!name) return true;
   if (name.startsWith('.')) return false;
   if (PRUNE_DIR_NAMES.has(name)) return false;
@@ -252,6 +269,20 @@ export function pruneDir(name: string): boolean {
   // convention (e.g. `people/pedro.raw/` holds raw source for pedro.md).
   // Both forms should be skipped at descent time.
   if (name.endsWith('.raw')) return false;
+  // Submodule detection: a git submodule directory contains `.git` as
+  // a FILE (a "gitfile" pointing into the parent's .git/modules/...),
+  // not a directory. Best-effort: if we can't stat (e.g. cross-platform
+  // permission edge), fall through and treat as a normal dir.
+  if (parentDir) {
+    try {
+      const gitPath = pathJoin(parentDir, name, '.git');
+      if (existsSync(gitPath) && statSync(gitPath).isFile()) {
+        return false;
+      }
+    } catch {
+      // Stat failed — descend normally rather than silently exclude.
+    }
+  }
   return true;
 }
 
@@ -471,6 +502,13 @@ export function classifyErrorCode(errorMsg: string): string {
     return 'TAKES_TABLE_MALFORMED';
   }
   if (/TAKES_HOLDER_INVALID/i.test(errorMsg)) return 'TAKES_HOLDER_INVALID';
+
+  // v0.41 content-sanity gate. Hard-blocks at importFromContent throw
+  // ContentSanityBlockError whose toString() embeds `PAGE_JUNK_PATTERN:`
+  // (see src/core/content-sanity.ts PAGE_JUNK_PATTERN_CODE). Soft-blocks
+  // (oversize alone) don't fail — the page lands with frontmatter.embed_skip
+  // set and never enters this classifier.
+  if (/PAGE_JUNK_PATTERN/i.test(errorMsg)) return 'PAGE_JUNK_PATTERN';
 
   return 'UNKNOWN';
 }
