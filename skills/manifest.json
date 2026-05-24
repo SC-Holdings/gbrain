@@ -217,7 +217,7 @@
     {
       "name": "cold-start",
       "path": "cold-start/SKILL.md",
-      "description": "Day-one brain bootstrapping: sequence the highest-leverage data sources (contacts, calendar, email, conversations, social, archives) to go from empty brain to useful brain. Uses ClawVisor for safe credential handling — agents never hold raw API keys."
+      "description": "Day-one brain bootstrapping: sequence the highest-leverage data sources (contacts, calendar, email, conversations, social, archives) to go from empty brain to useful brain. Uses ClawVisor for safe credential handling \u2014 agents never hold raw API keys."
     },
     {
       "name": "ask-user",
@@ -237,7 +237,22 @@
     {
       "name": "eiirp",
       "path": "eiirp/SKILL.md",
-      "description": "Everything In Its Right Place — post-work organizer. 7-phase audit: inventory, taxonomy, schema check (via cathedral CLI), file, skill graph audit, verify, report."
+      "description": "Everything In Its Right Place \u2014 post-work organizer. 7-phase audit: inventory, taxonomy, schema check (via cathedral CLI), file, skill graph audit, verify, report."
+    },
+    {
+      "name": "article-enrichment",
+      "path": "article-enrichment/SKILL.md",
+      "description": "Transform raw article text dumps in the brain into structured pages with executive summaries, verbatim quotes, key insights, why-it-matters, and cross-references."
+    },
+    {
+      "name": "book-mirror",
+      "path": "book-mirror/SKILL.md",
+      "description": "Take any book (EPUB/PDF), produce a personalized chapter-by-chapter analysis with two-column tables: left = chapter summary, right = how it applies to you based on brain context. Output: brain page + PDF."
+    },
+    {
+      "name": "frontmatter-guard",
+      "path": "frontmatter-guard/SKILL.md",
+      "description": "Validate and auto-repair YAML frontmatter on brain pages; gates against malformed YAML, missing closing ---, nested quotes, slug mismatches, null bytes"
     }
   ],
   "dependencies": {
