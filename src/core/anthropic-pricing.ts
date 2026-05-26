@@ -31,6 +31,21 @@ export const ANTHROPIC_PRICING: Record<string, ModelPricing> = {
   'claude-opus-4-6':            { input:  5.00, output: 25.00 },
   'claude-3-5-sonnet-20241022': { input:  3.00, output: 15.00 },
   'claude-3-5-haiku-20241022':  { input:  0.80, output:  4.00 },
+  // Free OpenRouter models (genuinely $0) — without an entry the budget
+  // tracker hard-fails any capped call (brainstorm/lsd force a $5 cap), so
+  // these are required to run brainstorm/lsd on the brain's free models.
+  // Keyed in both the bare (dream config) and provider-prefixed (gateway
+  // model-string) forms so direct lookup hits before the lossy `:` tail split.
+  'openai/gpt-oss-120b:free':                          { input: 0, output: 0 },
+  'openai:openai/gpt-oss-120b:free':                   { input: 0, output: 0 },
+  'openrouter:openai/gpt-oss-120b:free':               { input: 0, output: 0 },
+  'nvidia/nemotron-3-super-120b-a12b:free':            { input: 0, output: 0 },
+  'openai:nvidia/nemotron-3-super-120b-a12b:free':     { input: 0, output: 0 },
+  'openrouter:nvidia/nemotron-3-super-120b-a12b:free': { input: 0, output: 0 },
+  // Paid gpt-oss-120b (OpenRouter) — the radar's JUDGE model (NOT :free, so the
+  // :free->$0 rule doesn't apply). USD per 1M tokens, verified 2026-05-25.
+  'openai/gpt-oss-120b':             { input: 0.039, output: 0.18 },
+  'openrouter:openai/gpt-oss-120b':  { input: 0.039, output: 0.18 },
 };
 
 /**

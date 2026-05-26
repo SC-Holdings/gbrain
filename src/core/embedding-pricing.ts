@@ -37,6 +37,9 @@ export const EMBEDDING_PRICING: Record<string, EmbeddingPricing> = {
   'voyage:voyage-4-large':         { pricePerMTok: 0.18 },
   // ZeroEntropy (https://zeroentropy.dev/pricing — zembed-1)
   'zeroentropyai:zembed-1':        { pricePerMTok: 0.05 },
+  // Local Ollama embeddings (no API cost). Required so capped callers
+  // (brainstorm/lsd question-embed) don't hard-fail on missing pricing.
+  'ollama:bge-m3':                 { pricePerMTok: 0 },
 };
 
 export type PriceLookupResult =

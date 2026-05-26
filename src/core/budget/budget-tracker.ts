@@ -155,6 +155,9 @@ function lookupPricing(modelId: string, kind: BudgetKind): ModelPricing | null {
 }
 
 function costForUsage(modelId: string, inputTokens: number, outputTokens: number, kind: BudgetKind): number | null {
+  // OpenRouter ":free" variants are genuinely $0 — let any of them clear the
+  // budget gate without a per-model pricing entry (chat AND embed).
+  if (modelId.endsWith(':free')) return 0;
   const p = lookupPricing(modelId, kind);
   if (!p) return null;
   return (inputTokens / 1_000_000) * p.input + (outputTokens / 1_000_000) * p.output;
