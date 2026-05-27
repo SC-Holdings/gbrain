@@ -253,6 +253,11 @@
       "name": "frontmatter-guard",
       "path": "frontmatter-guard/SKILL.md",
       "description": "Validate and auto-repair YAML frontmatter on brain pages; gates against malformed YAML, missing closing ---, nested quotes, slug mismatches, null bytes"
+    },
+    {
+      "name": "schema-unify",
+      "path": "schema-unify/SKILL.md",
+      "description": "Migrate a brain off a noisy 24+-type pack onto gbrain-base-v2 (15 canonical types). 7-phase workflow: brain → assess → propose → apply → sync → verify → commit. Wraps the v0.41.22 unify-types PROTECTED Minion handler."
     }
   ],
   "dependencies": {
