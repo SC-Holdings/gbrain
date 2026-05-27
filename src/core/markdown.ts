@@ -47,6 +47,11 @@ export interface ParsedMarkdown {
   tags: string[];
   /** Present iff opts.validate. Empty array means no errors. */
   errors?: ParseValidationError[];
+  /** True when YAML frontmatter parsing threw and the parser fell back to
+   *  empty frontmatter + raw body. Set ALWAYS (independent of opts.validate)
+   *  so forgiving callers (importFromContent) can flag the page malformed
+   *  rather than silently mistyping it. See malformed-frontmatter.ts. */
+  frontmatterParseFailed?: boolean;
 }
 
 /**
@@ -127,6 +132,7 @@ export function parseMarkdown(
     title,
     tags,
   };
+  if (yamlParseError) result.frontmatterParseFailed = true;
   if (opts?.validate) result.errors = errors;
   return result;
 }

@@ -19,6 +19,7 @@ import { assessContentSanity, ContentSanityBlockError } from './content-sanity.t
 import { loadOperatorLiterals } from './content-sanity-literals.ts';
 import { logContentSanityAssessment } from './audit/content-sanity-audit.ts';
 import { isEmbedSkipped, buildEmbedSkipMarker, EMBED_SKIP_KEY } from './embed-skip.ts';
+import { MALFORMED_FRONTMATTER_KEY, buildMalformedFrontmatterMarker } from './malformed-frontmatter.ts';
 import { loadConfig, loadConfigWithEngine } from './config.ts';
 import {
   buildContextualPrefix,
@@ -377,6 +378,22 @@ export async function importFromContent(
         );
       }
     }
+  }
+
+  // Malformed-frontmatter warn-and-flag. parseMarkdown is forgiving: when YAML
+  // parsing throws it returns empty frontmatter + the raw `---…---` block trapped
+  // in the body, defaulting type→concept (this silently corrupted ~310 pages from
+  // unquoted `:` / leading `@`). Mark the page LOUDLY so detection + repair can
+  // find it by JSONB key existence, instead of silently mistyping it. The page
+  // still lands (raw content preserved) — same lossless contract as the
+  // content-sanity soft-block. Runs OUTSIDE the content-sanity kill-switch:
+  // frontmatter integrity is orthogonal to the junk/oversize gate. Placed before
+  // the hash compute so the marker persists into the written frontmatter row.
+  if (parsed.frontmatterParseFailed) {
+    parsed.frontmatter[MALFORMED_FRONTMATTER_KEY] = buildMalformedFrontmatterMarker();
+    process.stderr.write(
+      `[gbrain] malformed-frontmatter: ${slug} — YAML frontmatter failed to parse; page landed FLAGGED (type may be wrong, raw frontmatter trapped in body). Quote values containing ':' or starting with '@'.\n`,
+    );
   }
 
   // v0.39.3.0 CV8 — DB content_hash excludes timestamp-bearing frontmatter
