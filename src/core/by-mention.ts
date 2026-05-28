@@ -29,8 +29,13 @@
 import type { BrainEngine } from './engine.ts';
 import { stripCodeBlocks } from './link-extraction.ts';
 
-/** D2: hardcoded entity types for v1. Pack-aware extension is TODO-1. */
-export const LINKABLE_ENTITY_TYPES = ['person', 'company', 'organization', 'entity'] as const;
+/** D2: hardcoded entity types for v1. Pack-aware extension is TODO-1.
+ *  FORK ADDITION ('tech'): per PRD W8/D12 (pragmatic-first). Tech titles are
+ *  proper-noun-like ("PyTorch", "Hermes Agent", "MCP") and behave like the
+ *  named-entity types. TEMP pending ISC-84 (pack-aware reads `mention_linkable`
+ *  from the active pack). Do NOT remove 'organization'/'entity' — keep as
+ *  upstream fallback (D13). */
+export const LINKABLE_ENTITY_TYPES = ['person', 'company', 'organization', 'entity', 'tech'] as const;
 
 /**
  * Minimum title length for gazetteer inclusion. Filters out 2-3 char names

@@ -364,6 +364,8 @@ describe('buildGazetteer — engine integration', () => {
   test('LINKABLE_ENTITY_TYPES exposes the hardcoded contract', () => {
     // Regression: if anyone changes the hardcoded type list, this test
     // forces a deliberate change (and a corresponding test update).
-    expect(LINKABLE_ENTITY_TYPES).toEqual(['person', 'company', 'organization', 'entity']);
+    // FORK ADDITION: 'tech' per PRD W8/D12 (pragmatic-first). TEMP pending
+    // ISC-84 (pack-aware reads `mention_linkable` from the active pack).
+    expect(LINKABLE_ENTITY_TYPES).toEqual(['person', 'company', 'organization', 'entity', 'tech']);
   });
 });
