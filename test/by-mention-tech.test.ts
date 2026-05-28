@@ -63,4 +63,23 @@ describe('by-mention links tech-typed pages (outcome, mechanism-agnostic)', () =
     expect(bucket).toBeTruthy();
     expect(bucket!.some(e => e.slug === 'tech/pytorch')).toBe(true);
   });
+
+  test('auto-generated per-dir index pages (path titles ending in "/") are excluded', async () => {
+    // gbrain per-dir README pages are typed by directory with a path title.
+    // They must NOT enter the entity gazetteer (else "companies"/"people" prose
+    // words match them → dense false positives). See FORK GUARD in buildGazetteer.
+    await importFromContent(engine, 'companies/readme',
+      '---\ntype: company\ntitle: "companies/"\n---\n\nWhat goes in companies/.',
+      { noEmbed: true });
+    // A real company so the gazetteer isn't empty.
+    await importFromContent(engine, 'companies/anthropic',
+      '---\ntype: company\ntitle: "Anthropic"\n---\n\nAI lab.',
+      { noEmbed: true });
+
+    const gaz = await buildGazetteer(engine);
+    const allSlugs = [...gaz.values()].flat().map(e => e.slug);
+    expect(allSlugs).toContain('companies/anthropic');     // real entity present
+    expect(allSlugs).not.toContain('companies/readme');    // index page excluded
+    expect(gaz.has('companies')).toBe(false);              // no "companies" common-word bucket
+  });
 });

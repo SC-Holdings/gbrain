@@ -181,6 +181,13 @@ export async function buildGazetteer(
   const gazetteer: Gazetteer = new Map();
   for (const row of rows) {
     if (!row.title || row.title.length < MIN_NAME_LENGTH) continue;
+    // FORK GUARD (PRD W8): skip auto-generated per-directory index/README pages.
+    // gbrain's per-dir READMEs are typed by their directory (people/readme→person,
+    // companies/readme→company) with a path title ("people/", "companies/"). Those
+    // path-titles match common words ("people", "companies") in prose → dense false
+    // positives. A real entity title never ends in "/", so this is a safe structural
+    // exclusion (and a legit upstream-candidate fix). Survives README regeneration.
+    if (row.title.endsWith('/')) continue;
     if (ignoreSet.has(row.title) && !existingTitles.has(row.title)) continue;
 
     const tokens = tokenizeTitle(row.title);
