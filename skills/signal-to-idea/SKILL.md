@@ -112,4 +112,3 @@ New ideas created: W
 | New Idea | Source | Confidence |
 |----------|--------|------------|
 | {title} | {author} | {confidence} |
-```

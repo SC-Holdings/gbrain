@@ -46,6 +46,9 @@ export interface EmbedBackfillJobData {
   batchSize?: number;
   /** Audit string from the submitter (e.g. 'webhook', 'federation_flip'). */
   reason?: string;
+  /** Fork patch 2026-05-29: cap parallel slug-keys (upstream default 20) to avoid
+   * the Bun-runtime deadlock when embedding against a slow REMOTE ollama. */
+  concurrency?: number;
 }
 
 export interface EmbedBackfillResult {
@@ -85,14 +88,18 @@ function parseParams(data: Record<string, unknown>): EmbedBackfillJobData {
       : undefined;
   const reason =
     typeof data.reason === 'string' ? data.reason : undefined;
-  return { sourceId, batchSize, reason };
+  const concurrency =
+    typeof data.concurrency === 'number' && data.concurrency > 0
+      ? data.concurrency
+      : undefined;
+  return { sourceId, batchSize, reason, concurrency };
 }
 
 export function makeEmbedBackfillHandler(engine: BrainEngine) {
   return async function embedBackfillHandler(
     job: MinionJobContext,
   ): Promise<EmbedBackfillResult> {
-    const { sourceId, batchSize } = parseParams(job.data);
+    const { sourceId, batchSize, concurrency } = parseParams(job.data);
 
     // D2: per-source lock at handler entry. The submit-side cooldown (D19)
     // prevents most contention but this is the run-side safety net.
@@ -122,6 +129,10 @@ export function makeEmbedBackfillHandler(engine: BrainEngine) {
       const result = await withBudgetTracker(tracker, async () =>
         embedStaleForSource(engine, sourceId, {
           batchSize,
+          // Fork patch 2026-05-29: default to low concurrency (upstream default 20)
+          // so the embed pool can't trip the Bun-runtime deadlock against a slow
+          // REMOTE ollama (airbyte). Override via job param {"concurrency":N}.
+          concurrency: concurrency ?? 2,
           signal: job.signal,
           onProgress: ({ embedded, chunksProcessed, cursor }) => {
             // Fire-and-forget; updateProgress returns a Promise but the
