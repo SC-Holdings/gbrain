@@ -40,6 +40,10 @@ export const ANTHROPIC_PRICING: Record<string, ModelPricing> = {
   // :free->$0 rule doesn't apply). USD per 1M tokens, verified 2026-05-25.
   'openai/gpt-oss-120b':             { input: 0.039, output: 0.18 },
   'openrouter:openai/gpt-oss-120b':  { input: 0.039, output: 0.18 },
+  // FU18: Cerebras (OpenRouter :nitro) — fast structured output for expansion/chat/think.
+  'openai/gpt-oss-120b:nitro':            { input: 0.35, output: 0.75 },
+  'openai:openai/gpt-oss-120b:nitro':     { input: 0.35, output: 0.75 },
+  'openrouter:openai/gpt-oss-120b:nitro': { input: 0.35, output: 0.75 },
 };
 
 import { splitProviderModelId } from './model-id.ts';

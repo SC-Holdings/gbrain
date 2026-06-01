@@ -2021,17 +2021,28 @@ export async function expand(query: string): Promise<string[]> {
 
   try {
     const { model, recipe, modelId } = await resolveExpansionProvider(getExpansionModel());
-    const result = await generateObject({
-      model,
-      schema: ExpansionSchema,
-      prompt: [
-        'Rewrite the search query below into 3-4 different, related queries that would help find relevant documents.',
-        'Return ONLY the JSON object. Do NOT include the original query in the result.',
-        'Each rewrite should emphasize different aspects, synonyms, or framings.',
-        '',
-        `Query: ${query}`,
-      ].join('\n'),
-    });
+    // FU18 backstop: hard timeout so a stalled expansion LLM call falls back to the
+    // original query (via the catch below) instead of hanging until process teardown.
+    const EXPAND_TIMEOUT_MS = Number(process.env.GBRAIN_EXPANSION_TIMEOUT_MS) || 6000;
+    const _expAc = new AbortController();
+    const _expTimer = setTimeout(() => _expAc.abort(), EXPAND_TIMEOUT_MS);
+    const result = await Promise.race([
+      generateObject({
+        model,
+        schema: ExpansionSchema,
+        abortSignal: _expAc.signal,
+        prompt: [
+          'Rewrite the search query below into 3-4 different, related queries that would help find relevant documents.',
+          'Return ONLY the JSON object. Do NOT include the original query in the result.',
+          'Each rewrite should emphasize different aspects, synonyms, or framings.',
+          '',
+          `Query: ${query}`,
+        ].join('\n'),
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`expansion timed out after ${EXPAND_TIMEOUT_MS}ms`)), EXPAND_TIMEOUT_MS),
+      ),
+    ]).finally(() => clearTimeout(_expTimer));
 
     const expansions = result.object?.queries ?? [];
     // Deduplicate + include the original query
