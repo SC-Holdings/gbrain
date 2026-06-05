@@ -54,10 +54,9 @@ export const CANONICAL_PRICING: Record<string, ModelPricing> = {
   // ── OpenRouter gpt-oss (FORK: radar judge + FU18 Cerebras :nitro lane) ──
   // Paid gpt-oss-120b — radar JUDGE model (NOT :free; the :free->$0 rule lives
   // in budget-tracker costForUsage). USD/1M, verified 2026-05-25.
-  'openai/gpt-oss-120b':                  { input: 0.039, output: 0.18 },
   'openrouter:openai/gpt-oss-120b':       { input: 0.039, output: 0.18 },
+  'openai:openai/gpt-oss-120b':           { input: 0.039, output: 0.18 },
   // FU18: Cerebras (OpenRouter :nitro) — fast structured output for expansion/chat/think.
-  'openai/gpt-oss-120b:nitro':            { input: 0.35, output: 0.75 },
   'openai:openai/gpt-oss-120b:nitro':     { input: 0.35, output: 0.75 },
   'openrouter:openai/gpt-oss-120b:nitro': { input: 0.35, output: 0.75 },
   // ── Anthropic ──────────────────────────────────────────────────────────
