@@ -444,12 +444,12 @@ export interface CycleOpts {
    * When unset, the legacy global lock is used (back-compat for autopilot
    * + every existing caller).
    *
-   * **Note for follow-up waves:** this only scopes the LOCK. Several
-   * cycle phases (`embed`, `orphans`, `purge`, `resolve_symbol_edges`,
+   * **Note for follow-up waves:** this does not scope every phase. Several
+   * cycle phases (`orphans`, `purge`, `resolve_symbol_edges`,
    * `grade_takes`, `calibration_profile`) still operate brain-wide
-   * regardless of sourceId — see the `PHASE_SCOPE` taxonomy. Per-source
-   * cycle locks let two cycles RUN, but the global-scoped phases
-   * inside each will still touch the same rows. Genuine per-source
+   * regardless of sourceId — see the `PHASE_SCOPE` taxonomy. The embed phase
+   * is source-scoped when sourceId is known; the remaining global-scoped phases
+   * still touch the same rows across per-source cycles. Genuine per-source
    * fan-out requires the deferred TODOs in the plan.
    *
    * Validated via `assertValidSourceId` in `cycleLockIdFor` (defense-in-depth).
@@ -1111,10 +1111,10 @@ async function runPhaseResolveSymbolEdges(
   }
 }
 
-async function runPhaseEmbed(engine: BrainEngine, dryRun: boolean): Promise<PhaseResult> {
+async function runPhaseEmbed(engine: BrainEngine, dryRun: boolean, sourceId?: string): Promise<PhaseResult> {
   try {
     const { runEmbedCore } = await import('../commands/embed.ts');
-    const result = await runEmbedCore(engine, { stale: true, dryRun });
+    const result = await runEmbedCore(engine, { stale: true, dryRun, sourceId });
     const embeddedCount = dryRun ? result.would_embed : result.embedded;
     return {
       phase: 'embed',
@@ -2062,7 +2062,7 @@ export async function runCycle(
         });
       } else {
         progress.start('cycle.embed');
-        const { result, duration_ms } = await timePhase(() => runPhaseEmbed(engine, dryRun));
+        const { result, duration_ms } = await timePhase(() => runPhaseEmbed(engine, dryRun, cycleSourceId));
         result.duration_ms = duration_ms;
         phaseResults.push(result);
         progress.finish();

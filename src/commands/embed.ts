@@ -612,14 +612,16 @@ async function embedAllStale(
 
   // D3 + D3a + D8: wall-clock budget. 30 min default; env override.
   // v0.41.18.0 (A13): --catch-up removes the wall-clock cap entirely so the
-  // handler runs until countStaleChunks() returns 0. Use Number.MAX_SAFE_INTEGER
-  // (effectively unbounded) instead of the 30-min default. The AbortController
-  // still wraps for SIGINT propagation; just the timer never fires.
+  // handler runs until countStaleChunks() returns 0. Do NOT emulate unbounded
+  // with Number.MAX_SAFE_INTEGER: Node clamps overflowing timer delays and the
+  // abort can fire almost immediately. Instead, skip installing the timer.
   const BUDGET_MS = staleOpts?.catchUp
-    ? Number.MAX_SAFE_INTEGER
+    ? null
     : parseInt(process.env.GBRAIN_EMBED_TIME_BUDGET_MS || `${30 * 60 * 1000}`, 10);
   const budgetController = new AbortController();
-  const budgetTimer = setTimeout(() => budgetController.abort(), BUDGET_MS);
+  const budgetTimer = BUDGET_MS === null
+    ? null
+    : setTimeout(() => budgetController.abort(), BUDGET_MS);
   const budgetSignal = budgetController.signal;
 
   // v0.41.18.0 (A13): --priority recent threads orderBy='updated_desc' to
@@ -745,7 +747,7 @@ async function embedAllStale(
       if (batch.length < PAGE_SIZE) break;
     }
   } finally {
-    clearTimeout(budgetTimer);
+    if (budgetTimer) clearTimeout(budgetTimer);
   }
 
   slog(`Embedded ${result.embedded} chunks across ${totalProcessedPages} pages`);
