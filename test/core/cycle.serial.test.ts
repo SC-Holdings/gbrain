@@ -506,6 +506,16 @@ describe('runCycle — sourceId resolution (regression #475)', () => {
     expect(embedCalls.at(-1)?.sourceId).toBeUndefined();
   });
 
+  test("registered source path with trailing slash matches brainDir without slash", async () => {
+    await (sharedEngine as any).db.query(
+      "INSERT INTO sources (id, name, local_path) VALUES ($1, $2, $3)",
+      ["slashy", "slashy", "/tmp/brain-475-slashed/"],
+    );
+    await runCycle(sharedEngine, { brainDir: "/tmp/brain-475-slashed" });
+    expect(syncCalls.at(-1)?.sourceId).toBe("slashy");
+    expect(embedCalls.at(-1)?.sourceId).toBe("slashy");
+  });
+
   test('different brainDir than registered source → undefined (no cross-match)', async () => {
     await (sharedEngine as any).db.query(
       `INSERT INTO sources (id, name, local_path) VALUES ($1, $2, $3)`,

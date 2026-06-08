@@ -809,9 +809,11 @@ async function resolveSourceForDir(
   // (the cycleSourceId precedence) or 'default'.
   if (brainDir === null) return undefined;
   try {
+    const trimmed = brainDir.replace(/\/+$/, "");
+    const withSlash = trimmed.length > 0 ? `${trimmed}/` : "/";
     const rows = await engine.executeRaw<{ id: string }>(
-      `SELECT id FROM sources WHERE local_path = $1 LIMIT 1`,
-      [brainDir],
+      `SELECT id FROM sources WHERE local_path IN ($1, $2, $3) LIMIT 1`,
+      [brainDir, trimmed || "/", withSlash],
     );
     return rows[0]?.id;
   } catch {
