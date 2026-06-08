@@ -300,6 +300,7 @@ export function pruneDir(name: string, parentDir?: string): boolean {
  */
 export type SyncableReason =
   | 'metafile'
+  | 'generated-file'
   | 'strategy'
   | 'pruned-dir'
   | 'include-glob-miss'
@@ -315,6 +316,23 @@ export type SyncableReason =
  * wants to index one of these basenames as a page should rename it.
  */
 export const SYNC_SKIP_FILES = ['schema.md', 'index.md', 'log.md', 'README.md'] as const;
+
+/**
+ * Generated dependency lockfiles are machine output, not useful semantic code.
+ * Treat them as unsyncable even under strategy=code: large lockfiles generate
+ * thousands of low-value chunks and can wedge local embedding backfills.
+ */
+export const GENERATED_SYNC_SKIP_FILES = [
+  'package-lock.json',
+  'npm-shrinkwrap.json',
+  'pnpm-lock.yaml',
+  'yarn.lock',
+  'bun.lock',
+  'bun.lockb',
+  'poetry.lock',
+  'Pipfile.lock',
+  'Cargo.lock',
+] as const;
 
 /**
  * Internal classifier. Returns null when the path IS syncable, or a tagged
@@ -339,6 +357,7 @@ function classifySync(path: string, opts: SyncableOptions = {}): SyncableReason 
   // Skip meta files that aren't pages
   const basename = segments[segments.length - 1] || '';
   if ((SYNC_SKIP_FILES as readonly string[]).includes(basename)) return 'metafile';
+  if ((GENERATED_SYNC_SKIP_FILES as readonly string[]).includes(basename)) return 'generated-file';
 
   if (opts.include && opts.include.length > 0 && !matchesAnyGlob(path, opts.include)) return 'include-glob-miss';
   if (opts.exclude && opts.exclude.length > 0 && matchesAnyGlob(path, opts.exclude)) return 'exclude-glob-hit';

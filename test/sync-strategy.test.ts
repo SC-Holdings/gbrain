@@ -62,6 +62,14 @@ describe('isSyncable with strategy', () => {
     expect(isSyncable('dir/.raw/code.ts', { strategy: 'code' })).toBe(false);
   });
 
+  test('generated dependency lockfiles are skipped under code and auto strategies', () => {
+    expect(isSyncable('package-lock.json', { strategy: 'code' })).toBe(false);
+    expect(isSyncable('website/package-lock.json', { strategy: 'code' })).toBe(false);
+    expect(isSyncable('pnpm-lock.yaml', { strategy: 'auto' })).toBe(false);
+    expect(isSyncable('yarn.lock', { strategy: 'auto' })).toBe(false);
+    expect(isSyncable('src/schema.json', { strategy: 'code' })).toBe(true);
+  });
+
   test('include globs whitelist specific patterns', () => {
     expect(isSyncable('src/foo.ts', { strategy: 'code', include: ['src/**/*.ts'] })).toBe(true);
     expect(isSyncable('lib/bar.ts', { strategy: 'code', include: ['src/**/*.ts'] })).toBe(false);
