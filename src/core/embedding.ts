@@ -87,7 +87,7 @@ export interface EmbedBatchOptions {
  * adaptive batch splitting and per-recipe token-budget logic; this paginator
  * is purely about progress-callback granularity.
  */
-const BATCH_SIZE = 16; // was 100 — CPU TEI times out on big per-request batches (2026-06-09)
+const BATCH_SIZE = 8; // 100->16->8: CPU TEI + concurrency contention timeouts (2026-06-09)
 export async function embedBatch(
   texts: string[],
   options: EmbedBatchOptions = {},
