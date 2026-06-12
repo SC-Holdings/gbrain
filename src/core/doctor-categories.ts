@@ -116,6 +116,7 @@ export const BRAIN_CHECK_NAMES: ReadonlySet<string> = new Set([
  */
 export const SKILL_CHECK_NAMES: ReadonlySet<string> = new Set([
   'resolver_health',
+  'retrieval_reflex_health',
   'skill_brain_first',
   'skill_conformance',
   'whoknows_health',
@@ -151,6 +152,7 @@ export const OPS_CHECK_NAMES: ReadonlySet<string> = new Set([
   'subagent_health',
   'supervisor',
   'supervisor_niceness',
+  'supervisor_singleton',
   'sync_consolidation',
   'wedged_queue',
   'worker_oom_loop',
