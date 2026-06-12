@@ -205,7 +205,9 @@ export async function dispatchPerSource(
       const job = await queue.add(
         'autopilot-cycle',
         {
-          repoPath: opts.repoPath,
+          // Fork fix: thread each source's own checkout path; the global
+          // repoPath made non-default sources cycle the wrong working tree.
+          repoPath: src.local_path ?? opts.repoPath,
           source_id: src.id,
           pull: !!remoteUrl,
         },
