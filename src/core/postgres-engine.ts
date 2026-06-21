@@ -2166,14 +2166,17 @@ export class PostgresEngine implements BrainEngine {
                 THEN EXCLUDED.embedded_at
            ELSE content_chunks.embedded_at
          END,
-         language = EXCLUDED.language,
-         symbol_name = EXCLUDED.symbol_name,
-         symbol_type = EXCLUDED.symbol_type,
-         start_line = EXCLUDED.start_line,
-         end_line = EXCLUDED.end_line,
-         parent_symbol_path = EXCLUDED.parent_symbol_path,
-         doc_comment = EXCLUDED.doc_comment,
-         symbol_name_qualified = EXCLUDED.symbol_name_qualified,
+         -- v2026-06-21 code-intel durability: preserve code symbol metadata when a re-embed
+         -- upserts chunks WITHOUT it (embed.ts rebuilds chunks sans symbol_*). Mirrors the
+         -- embedding/model/image COALESCE-preserve-on-null pattern already used above.
+         language = COALESCE(EXCLUDED.language, content_chunks.language),
+         symbol_name = COALESCE(EXCLUDED.symbol_name, content_chunks.symbol_name),
+         symbol_type = COALESCE(EXCLUDED.symbol_type, content_chunks.symbol_type),
+         start_line = COALESCE(EXCLUDED.start_line, content_chunks.start_line),
+         end_line = COALESCE(EXCLUDED.end_line, content_chunks.end_line),
+         parent_symbol_path = COALESCE(EXCLUDED.parent_symbol_path, content_chunks.parent_symbol_path),
+         doc_comment = COALESCE(EXCLUDED.doc_comment, content_chunks.doc_comment),
+         symbol_name_qualified = COALESCE(EXCLUDED.symbol_name_qualified, content_chunks.symbol_name_qualified),
          modality = EXCLUDED.modality,
          embedding_image = COALESCE(EXCLUDED.embedding_image, content_chunks.embedding_image)`,
       params as Parameters<typeof sql.unsafe>[1],
