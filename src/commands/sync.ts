@@ -782,6 +782,27 @@ export async function performSync(engine: BrainEngine, opts: SyncOpts): Promise<
   //
   // skipLock is reserved for callers that already serialize via another
   // mechanism (e.g. cycle.ts holds gbrain-cycle for the broader scope).
+  // v2026-06-21 code-intel durability: honor per-source config.strategy when the caller
+  // didn't pass one. The cycle (runPhaseSync) and the standalone autopilot `sync` job both
+  // omit strategy, so performSyncInner defaulted to 'markdown' and re-indexed CODE sources
+  // as docs; a later re-embed then nulls their symbol_name → code-intel wipe. Mirrors the
+  // multi-source path, which already reads cfg.strategy.
+  if (!opts.strategy && opts.sourceId) {
+    try {
+      const { fetchSource, parseSourceConfig } = await import('../core/sources-load.ts');
+      const src = await fetchSource(engine, opts.sourceId);
+      const s = src ? parseSourceConfig(src.config).strategy : undefined;
+      if (s === 'code' || s === 'auto' || s === 'markdown') opts = { ...opts, strategy: s };
+    } catch (e) {
+      // Surface, don't swallow: a failed strategy read here would let a CODE source fall
+      // back to the markdown default and re-trigger the exact code-intel wipe this guards.
+      process.stderr.write(
+        `[sync] could not resolve config.strategy for source ${opts.sourceId}; using default: ` +
+        `${e instanceof Error ? e.message : String(e)}\n`,
+      );
+    }
+  }
+
   if (opts.skipLock) {
     return await performSyncInner(engine, opts);
   }
