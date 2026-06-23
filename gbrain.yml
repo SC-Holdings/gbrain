@@ -16,3 +16,15 @@ storage:
     - media/x/
     - media/articles/
     - meetings/transcripts/
+
+# Recency decay overrides (gbrain decision-governance, 2026-06-22).
+# Per-prefix age-decay for the RECENCY ranking axis (src/core/search/recency-decay.ts).
+# decisions/ decays fast so "what's the LATEST decision on X" surfaces the newest.
+# CAVEAT: this only fires when the recency axis is ON. Canonical-truth lookups
+# auto-detect recency='off' (query-intent.ts: "canonical truth -> off"), so this
+# does NOT cover the stale-decision-as-truth class — that's handled by the
+# recency-INDEPENDENT content_flag sweep. This is the temporal-query complement.
+recency:
+  decisions/:
+    halflifeDays: 45
+    coefficient: 1.0
