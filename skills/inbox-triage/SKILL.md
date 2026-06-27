@@ -111,3 +111,12 @@ Do NOT auto-delete — present list and ask for confirmation.
 |------|--------|
 | 00-inbox/bar | Empty stub |
 ```
+
+## Anti-Patterns
+
+- ❌ Auto-deleting Tier 3. Noise is FLAGGED, never deleted without explicit confirmation — present the list and ask.
+- ❌ Assigning more than one tier. Every `00-inbox/` page gets exactly one tier.
+- ❌ Routing a Tier 1 page without reading it in full. Phase 2 reads title + first 200 chars to classify; Phase 3 reads the WHOLE page before creating the namespaced page.
+- ❌ Skipping the filing rules. Read `skills/_brain-filing-rules.md` before routing any page — it owns namespace + frontmatter conventions.
+- ❌ Routing a person/company without checking for an existing page first — that creates the duplicates triage exists to prevent.
+- ❌ Blowing the token budget. Process in batches of 20; don't load the whole inbox at once.

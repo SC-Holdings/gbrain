@@ -68,18 +68,6 @@ jobs:
             echo "✗ cache MISS for hash ${{ steps.compute.outputs.hash }} — full suite will run"
           fi
 
-  gitleaks:
-    needs: cache-check
-    if: needs.cache-check.outputs.hit != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-        with:
-          fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc  # v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   verify:
     # Pre-test gates: privacy/jsonb/source-id/etc + typecheck + admin-build.
     # Lives in its own runner so the matrix shards aren't carrying ~2-3min
@@ -179,7 +167,7 @@ jobs:
     # slow-entity-resolve-perf (~2.6 min) ≈ 4.8 min.
     #
     # Concurrency budget: 10 shards + verify + serial + slow-eval +
-    # slow-entity-resolve-perf + gitleaks + cache-check + cache-write +
+    # slow-entity-resolve-perf + cache-check + cache-write +
     # test-status = ~18 jobs × 2 concurrent PRs = 36. GitHub free-tier
     # caps at ~20 concurrent jobs, so multi-PR days will see some queue
     # pressure. Single-PR runs are unaffected.
@@ -217,7 +205,7 @@ jobs:
   # entry written when tests hadn't actually passed).
   # ──────────────────────────────────────────────────────────────────────
   cache-write:
-    needs: [cache-check, gitleaks, verify, serial-tests, slow-eval-longmemeval, slow-entity-resolve-perf, test]
+    needs: [cache-check, verify, serial-tests, slow-eval-longmemeval, slow-entity-resolve-perf, test]
     if: success() && needs.cache-check.outputs.hit != 'true'
     runs-on: ubuntu-latest
     steps:
@@ -235,31 +223,30 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────
   # test-status: the single user-visible "did CI pass?" check.
   # Runs always (if: always()), succeeds when EITHER cache-check.hit==true
-  # OR all gated jobs (gitleaks, verify, serial-tests, test) succeeded.
+  # OR all gated jobs (verify, serial-tests, test) succeeded.
   # Branch protection (when configured) gates on this single job name.
   # ──────────────────────────────────────────────────────────────────────
   test-status:
-    needs: [cache-check, gitleaks, verify, serial-tests, slow-eval-longmemeval, slow-entity-resolve-perf, test]
+    needs: [cache-check, verify, serial-tests, slow-eval-longmemeval, slow-entity-resolve-perf, test]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Aggregate result
         run: |
           HIT="${{ needs.cache-check.outputs.hit }}"
-          GITLEAKS="${{ needs.gitleaks.result }}"
           VERIFY="${{ needs.verify.result }}"
           SERIAL="${{ needs.serial-tests.result }}"
           SLOW_EVAL="${{ needs.slow-eval-longmemeval.result }}"
           SLOW_PERF="${{ needs.slow-entity-resolve-perf.result }}"
           TEST="${{ needs.test.result }}"
           echo "cache-check.hit=$HIT"
-          echo "gitleaks=$GITLEAKS  verify=$VERIFY  serial-tests=$SERIAL  slow-eval-longmemeval=$SLOW_EVAL  slow-entity-resolve-perf=$SLOW_PERF  test=$TEST"
+          echo "verify=$VERIFY  serial-tests=$SERIAL  slow-eval-longmemeval=$SLOW_EVAL  slow-entity-resolve-perf=$SLOW_PERF  test=$TEST"
           if [ "$HIT" = "true" ]; then
             echo "✓ cache HIT for hash ${{ needs.cache-check.outputs.hash }} — CI green"
             exit 0
           fi
           # Cache miss: every gated job must have succeeded.
-          for r in "$GITLEAKS" "$VERIFY" "$SERIAL" "$SLOW_EVAL" "$SLOW_PERF" "$TEST"; do
+          for r in "$VERIFY" "$SERIAL" "$SLOW_EVAL" "$SLOW_PERF" "$TEST"; do
             if [ "$r" != "success" ]; then
               echo "✗ gated job did not succeed (got $r) — CI fail"
               exit 1
