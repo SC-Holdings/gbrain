@@ -63,6 +63,7 @@ export const CANONICAL_PRICING: Record<string, ModelPricing> = {
   // Opus 4.x: $5 in / $25 out. 4.8 (released 2026-05-28) shares 4.7's
   // per-token rate — closes gbrain#1819.
   'anthropic:claude-opus-4-8':            { input:  5.00, output: 25.00 },
+  'openrouter:anthropic/claude-opus-4.8': { input:  5.00, output: 25.00 },
   'anthropic:claude-opus-4-7':            { input:  5.00, output: 25.00 },
   'anthropic:claude-opus-4-6':            { input:  5.00, output: 25.00 },
   'anthropic:claude-sonnet-4-6':          { input:  3.00, output: 15.00 },

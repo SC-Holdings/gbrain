@@ -32,6 +32,7 @@ import { mkdirSync, appendFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { gbrainPath } from '../config.ts';
 import { ANTHROPIC_PRICING, type ModelPricing } from '../anthropic-pricing.ts';
+import { CANONICAL_PRICING } from '../model-pricing.ts';  // budget gate parity for OpenRouter-routed models
 import { EMBEDDING_PRICING, lookupEmbeddingPrice } from '../embedding-pricing.ts';
 import { splitProviderModelId } from '../model-id.ts';
 import { isoWeekFilename, resolveAuditDir } from '../audit-week-file.ts';
@@ -201,6 +202,8 @@ function lookupPricing(modelId: string, kind: BudgetKind): ModelPricing | null {
   if (kind === 'rerank' && providerId && FREE_LOCAL_RERANK_PROVIDERS.has(providerId)) {
     return { input: 0, output: 0 };
   }
+  const canon = CANONICAL_PRICING[modelId];  // price any canonical model (openrouter:* keys), parity with the cost estimate
+  if (canon) return canon;
   return null;
 }
 
