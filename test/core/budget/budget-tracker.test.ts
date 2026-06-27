@@ -75,6 +75,22 @@ describe('BudgetTracker.reserve', () => {
     expect(audit[0].schema_version).toBe(1);
   });
 
+  test('prices OpenRouter-routed non-Anthropic models via canonical table (TX2 regression)', () => {
+    // openrouter:openai/gpt-oss-120b is in CANONICAL_PRICING but not the
+    // anthropic-only ANTHROPIC_PRICING view. The gate must price it via the
+    // canonical fallback (not no_pricing-fail) under --max-cost. Regression
+    // for skillopt/eval runs routed through OpenRouter.
+    const t = new BudgetTracker({ maxCostUsd: 1.0, label: 'test', auditPath });
+    expect(() =>
+      t.reserve({
+        modelId: 'openrouter:openai/gpt-oss-120b',
+        estimatedInputTokens: 1000,
+        maxOutputTokens: 1000,
+        kind: 'chat',
+      }),
+    ).not.toThrow();
+  });
+
   test('throws BudgetExhausted (reason: cost) when projected > cap', () => {
     const t = new BudgetTracker({ maxCostUsd: 0.001, label: 'test', auditPath });
     let caught: unknown = null;
