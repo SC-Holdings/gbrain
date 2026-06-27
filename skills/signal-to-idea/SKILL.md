@@ -112,3 +112,16 @@ New ideas created: W
 | New Idea | Source | Confidence |
 |----------|--------|------------|
 | {title} | {author} | {confidence} |
+```
+
+## Anti-Patterns
+
+- ❌ Promoting below the bar. Only `signal_type=business_idea` AND (`confidence=high` OR `convergence_score≥0.7`) gets promoted; lower-confidence signals stay signals.
+- ❌ Skipping the dedup search. Always `gbrain search` the signal statement first — a near-duplicate idea means SKIP-and-log, never a second page.
+- ❌ Inventing confidence or alignment. New ideas enter at `stage: source`, `confidence: low`, `telos_alignment: 0` — promotion is provenance, not validation.
+- ❌ Dropping the source link. Every idea cross-links back to the author's person page and the source post; an idea with no traceable signal is unfalsifiable.
+- ❌ More than one page per signal, or writing outside `ideas/`. One signal → one `ideas/{slug}` page.
+
+## Output Format
+
+The output shape is the **Signal→Idea Promotion Report** documented in the `## Output` section above (signals scanned / candidates / duplicates skipped / new ideas created, plus the new-idea table). This literal header exists for the conformance test (`test/skills-conformance.test.ts`).

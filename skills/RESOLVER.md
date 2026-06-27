@@ -22,7 +22,7 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 | Fix broken citations in brain pages | `skills/citation-fixer/SKILL.md` |
 | "Research", "track", "extract from email", "investor updates", "donations" | `skills/data-research/SKILL.md` |
 | Share a brain page as a link | `skills/publish/SKILL.md` |
-| "Triage idea", "evaluate idea", "advance idea", "kill idea", "idea pipeline status" | `skills/idea-triage/SKILL.md` |
+| "Triage this idea", "evaluate idea", "advance idea", "kill this idea", "idea pipeline status" | `skills/idea-triage/SKILL.md` |
 | "Triage inbox", "process inbox", "classify inbox", "clean inbox" | `skills/inbox-triage/SKILL.md` |
 | "Promote signals to ideas", "check for new business ideas from influencers", "signal to idea promotion" | `skills/signal-to-idea/SKILL.md` |
 

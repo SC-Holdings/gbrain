@@ -33,23 +33,23 @@ beforeEach(async () => {
 describe('by-mention links tech-typed pages (outcome, mechanism-agnostic)', () => {
   test('a prose mention of a tech page title creates a mentions link', async () => {
     // A tech entity page with a proper-noun title (the kind tech titles tend to be).
-    await importFromContent(engine, 'tech/hermes-agent',
-      '---\ntype: tech\ntitle: "Hermes Agent"\n---\n\nThe runtime.',
+    await importFromContent(engine, 'tech/apache-kafka',
+      '---\ntype: tech\ntitle: "Apache Kafka"\n---\n\nThe runtime.',
       { noEmbed: true });
 
     // A note that mentions the tech entity in prose (no [[wikilink]]).
     await importFromContent(engine, 'analysis/some-note',
-      '---\ntype: analysis\ntitle: "A note"\n---\n\nWe evaluated Hermes Agent for orchestration.',
+      '---\ntype: analysis\ntitle: "A note"\n---\n\nWe evaluated Apache Kafka for orchestration.',
       { noEmbed: true });
 
     const gaz = await buildGazetteer(engine);
     const mentions = findMentionedEntities(
-      'We evaluated Hermes Agent for orchestration.',
+      'We evaluated Apache Kafka for orchestration.',
       gaz,
       { fromSlug: 'analysis/some-note', fromSourceId: 'default' },
     );
 
-    expect(mentions.map(m => m.slug)).toContain('tech/hermes-agent');
+    expect(mentions.map(m => m.slug)).toContain('tech/apache-kafka');
   });
 
   test('a well-formed tech title (proper-noun, >= MIN_NAME_LENGTH) appears in the gazetteer', async () => {
