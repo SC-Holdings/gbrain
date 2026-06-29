@@ -140,7 +140,7 @@ export function makeEmbedBackfillHandler(engine: BrainEngine) {
   return async function embedBackfillHandler(
     job: MinionJobContext,
   ): Promise<EmbedBackfillResult> {
-    const { sourceId, batchSize, concurrency } = parseParams(job.data);
+    const { sourceId, batchSize, concurrency: jobConcurrency } = parseParams(job.data);
 
     // D2: per-source lock at handler entry. The submit-side cooldown (D19)
     // prevents most contention but this is the run-side safety net.
@@ -178,10 +178,10 @@ export function makeEmbedBackfillHandler(engine: BrainEngine) {
           // Fork patch 2026-05-29: default to low concurrency (upstream default 20)
           // so the embed pool can't trip the Bun-runtime deadlock against a slow
           // REMOTE ollama (airbyte). Override via job param {"concurrency":N}.
-          concurrency: concurrency ?? 2,
+          concurrency: (jobConcurrency ?? concurrency) ?? 2,
           signal: job.signal,
           pacer,
-          ...(concurrency !== undefined && { concurrency }),
+          ...((jobConcurrency ?? concurrency) !== undefined && { concurrency: jobConcurrency ?? concurrency }),
           // v0.41.31: re-embed pages whose model signature drifted + stamp
           // provenance as chunks land.
           embeddingSignature: currentEmbeddingSignature(),
